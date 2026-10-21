@@ -1,7 +1,13 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Music2, Volume2, VolumeX, Sparkles } from "lucide-react";
+import {
+  Volume2,
+  VolumeX,
+  MoonStar,
+  Sparkles,
+  Star,
+} from "lucide-react";
 
 // ==========================================
 // CONFIGURACIÓN EDITABLE - WEDLY
@@ -10,44 +16,151 @@ import { Music2, Volume2, VolumeX, Sparkles } from "lucide-react";
 const CONFIG = {
   cancion: "/musica.mp3",
   volumen: 0.45,
-  titulo: "Una melodía para nuestro amor",
+  titulo: "Una melodía entre las estrellas",
   descripcion:
-    "Hemos elegido una canción especial para acompañarte durante esta invitación.",
+    "Hay canciones que nos transportan a otros universos. Elegimos una muy especial para acompañarte en este pequeño viaje hacia nuestro gran día.",
+  pregunta: "¿Nos acompañas con música?",
 };
 
 // ==========================================
-// COMPONENTE MÚSICA
+// ESTRELLAS DECORATIVAS
 // ==========================================
 
-const Musica = () => {
+const ESTRELLAS = [
+  { x: 9, y: 12, size: 2, delay: 0 },
+  { x: 24, y: 8, size: 1, delay: 1 },
+  { x: 81, y: 11, size: 2, delay: 0.6 },
+  { x: 92, y: 29, size: 1, delay: 1.8 },
+  { x: 14, y: 37, size: 1, delay: 2 },
+  { x: 85, y: 48, size: 2, delay: 0.9 },
+  { x: 7, y: 72, size: 2, delay: 1.2 },
+  { x: 91, y: 81, size: 1, delay: 0.3 },
+  { x: 28, y: 91, size: 2, delay: 1.7 },
+  { x: 73, y: 94, size: 1, delay: 2.4 },
+  { x: 54, y: 6, size: 1, delay: 1.4 },
+  { x: 48, y: 96, size: 2, delay: 0.7 },
+];
+
+function CieloEstrellado() {
+  return (
+    <div
+      className="pointer-events-none absolute inset-0 overflow-hidden"
+      aria-hidden="true"
+    >
+      {ESTRELLAS.map((estrella, index) => (
+        <motion.span
+          key={index}
+          className="absolute rounded-full bg-[#F4E8CD]"
+          style={{
+            left: `${estrella.x}%`,
+            top: `${estrella.y}%`,
+            width: estrella.size,
+            height: estrella.size,
+          }}
+          animate={{
+            opacity: [0.25, 0.95, 0.25],
+            scale: [1, 1.4, 1],
+          }}
+          transition={{
+            duration: 3.5 + (index % 3),
+            delay: estrella.delay,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+
+      {/* CONSTELACIÓN SUPERIOR */}
+      <svg
+        viewBox="0 0 320 180"
+        className="absolute left-0 top-0 w-full opacity-35"
+        fill="none"
+      >
+        <path
+          d="M12 66 L68 30 L115 78 L176 43 L224 92 L307 35"
+          stroke="#C6AA79"
+          strokeWidth="0.65"
+          strokeDasharray="3 6"
+        />
+        {[ [12,66], [68,30], [115,78], [176,43], [224,92], [307,35] ].map(
+          ([cx, cy], index) => (
+            <circle
+              key={index}
+              cx={cx}
+              cy={cy}
+              r="2"
+              fill="#E8D4AC"
+            />
+          )
+        )}
+      </svg>
+
+      {/* CONSTELACIÓN INFERIOR */}
+      <svg
+        viewBox="0 0 320 130"
+        className="absolute bottom-0 right-0 w-full opacity-25"
+        fill="none"
+      >
+        <path
+          d="M8 110 L72 63 L129 91 L185 35 L248 67 L311 12"
+          stroke="#C6AA79"
+          strokeWidth="0.65"
+          strokeDasharray="3 6"
+        />
+        {[ [8,110], [72,63], [129,91], [185,35], [248,67], [311,12] ].map(
+          ([cx, cy], index) => (
+            <circle
+              key={index}
+              cx={cx}
+              cy={cy}
+              r="2"
+              fill="#E8D4AC"
+            />
+          )
+        )}
+      </svg>
+    </div>
+  );
+}
+
+// ==========================================
+// COMPONENTE PRINCIPAL
+// ==========================================
+
+export default function Musica() {
   const audioRef = useRef(null);
 
   const [mostrarVentana, setMostrarVentana] = useState(true);
   const [reproduciendo, setReproduciendo] = useState(false);
 
-  // ==========================================
-  // CONFIGURAR AUDIO
-  // ==========================================
-
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = CONFIG.volumen;
-    }
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.volume = CONFIG.volumen;
+
+    const sincronizar = () => {
+      setReproduciendo(!audio.paused);
+    };
+
+    audio.addEventListener("play", sincronizar);
+    audio.addEventListener("pause", sincronizar);
+    audio.addEventListener("ended", sincronizar);
 
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+      audio.pause();
+      audio.removeEventListener("play", sincronizar);
+      audio.removeEventListener("pause", sincronizar);
+      audio.removeEventListener("ended", sincronizar);
     };
   }, []);
 
   // ==========================================
-  // INICIAR MÚSICA
+  // FUNCIONES DE MÚSICA
   // ==========================================
 
   const iniciarMusica = async () => {
     const audio = audioRef.current;
-
     if (!audio) return;
 
     try {
@@ -61,49 +174,40 @@ const Musica = () => {
     }
   };
 
-  // ==========================================
-  // CONTINUAR SIN MÚSICA
-  // ==========================================
-
   const continuarSinMusica = () => {
+    audioRef.current?.pause();
     setReproduciendo(false);
     setMostrarVentana(false);
   };
 
-  // ==========================================
-  // ACTIVAR / DESACTIVAR MÚSICA
-  // ==========================================
-
   const alternarMusica = async () => {
     const audio = audioRef.current;
-
     if (!audio) return;
 
-    if (reproduciendo) {
+    if (!audio.paused) {
       audio.pause();
       setReproduciendo(false);
-    } else {
-      try {
-        await audio.play();
-        setReproduciendo(true);
-      } catch (error) {
-        console.warn("No se pudo reproducir la música:", error);
-      }
+      return;
+    }
+
+    try {
+      await audio.play();
+      setReproduciendo(true);
+    } catch (error) {
+      console.warn("No se pudo reproducir la música:", error);
+      setReproduciendo(false);
     }
   };
 
   return (
     <>
-      {/* ======================================
-          AUDIO
-      ====================================== */}
-
+      {/* AUDIO */}
       <audio ref={audioRef} loop preload="none">
         <source src={CONFIG.cancion} type="audio/mpeg" />
       </audio>
 
       {/* ======================================
-          VENTANA EMERGENTE
+          VENTANA DE BIENVENIDA
       ====================================== */}
 
       <AnimatePresence>
@@ -113,249 +217,203 @@ const Musica = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.45 }}
             className="
-              fixed
-              inset-0
-              z-[9999]
-              flex
-              items-center
-              justify-center
+              fixed inset-0 z-[9999]
+              flex items-center justify-center
               overflow-y-auto
-              bg-black/65
-              px-5
-              py-8
+              bg-[#030712]/90
+              px-4 py-6
+              sm:px-6
             "
           >
-            {/* TARJETA */}
-
             <motion.div
               role="dialog"
               aria-modal="true"
               aria-labelledby="titulo-musica"
-              initial={{
-                opacity: 0,
-                y: 45,
-                scale: 0.94,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-                scale: 1,
-              }}
-              exit={{
-                opacity: 0,
-                y: 25,
-                scale: 0.96,
-              }}
+              initial={{ opacity: 0, y: 35, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.97 }}
               transition={{
                 duration: 0.7,
                 ease: [0.22, 1, 0.36, 1],
               }}
               className="
-                relative
-                my-auto
-                w-full
-                max-w-md
+                relative my-auto
+                w-full max-w-[440px]
                 overflow-hidden
-                rounded-tl-[4rem]
-                rounded-br-[4rem]
-                rounded-tr-[1rem]
-                rounded-bl-[1rem]
-                border
-                border-[#E7D7B1]
-                bg-[#F7F4ED]
-                px-7
-                py-12
+                rounded-t-[190px]
+                rounded-b-[24px]
+                border border-[#C6AA79]/60
+                bg-[#0B1425]
+                px-6 pb-9 pt-14
                 text-center
-                shadow-[0_20px_60px_rgba(0,0,0,0.22)]
-                sm:px-10
-                sm:py-14
+                shadow-[0_25px_75px_rgba(0,0,0,0.5)]
+                sm:px-10 sm:pb-11 sm:pt-16
               "
             >
-              {/* MARCO DECORATIVO */}
+              <CieloEstrellado />
 
+              {/* MARCO INTERIOR */}
               <div
+                aria-hidden="true"
                 className="
                   pointer-events-none
-                  absolute
-                  inset-3
-                  rounded-tl-[3.4rem]
-                  rounded-br-[3.4rem]
-                  rounded-tr-[0.7rem]
-                  rounded-bl-[0.7rem]
-                  border
-                  border-[#B89B5E]/40
+                  absolute inset-[9px]
+                  rounded-t-[180px]
+                  rounded-b-[17px]
+                  border border-[#C6AA79]/25
                 "
               />
 
               <div className="relative z-10">
 
-                {/* ORNAMENTO SUPERIOR */}
+                {/* ORNAMENTO */}
+                <div className="mb-6 flex items-center justify-center gap-4">
+                  <span className="h-px w-9 bg-[#C6AA79]/65" />
 
-                <div
-                  className="
-                    mb-8
-                    flex
-                    items-center
-                    justify-center
-                    gap-4
-                  "
-                >
-                  <span className="h-px w-10 bg-[#B89B5E]" />
-
-                  <Sparkles
-                    size={19}
+                  <Star
+                    size={15}
                     strokeWidth={1.2}
-                    className="text-[#B89B5E]"
+                    className="text-[#C6AA79]"
                   />
 
-                  <span className="h-px w-10 bg-[#B89B5E]" />
+                  <span className="h-px w-9 bg-[#C6AA79]/65" />
                 </div>
 
-                {/* ÍCONO MUSICAL */}
-
+                {/* LUNA */}
                 <motion.div
-                  animate={{
-                    y: [0, -5, 0],
-                  }}
+                  animate={{ y: [0, -7, 0] }}
                   transition={{
-                    duration: 3.5,
+                    duration: 5,
                     repeat: Infinity,
                     ease: "easeInOut",
                   }}
                   className="
-                    mx-auto
-                    mb-7
-                    flex
-                    h-20
-                    w-20
-                    items-center
-                    justify-center
+                    relative mx-auto mb-7
+                    flex h-24 w-24
+                    items-center justify-center
                     rounded-full
-                    border
-                    border-[#B89B5E]
-                    bg-white
-                    text-[#B89B5E]
+                    border border-[#C6AA79]/40
+                    bg-[#14243B]
+                    sm:h-28 sm:w-28
                   "
                 >
-                  <Music2
-                    size={36}
-                    strokeWidth={1.2}
+                  <div
+                    className="
+                      absolute inset-2 rounded-full
+                      border border-[#C6AA79]/20
+                    "
                   />
+
+                  <MoonStar
+                    size={47}
+                    strokeWidth={1}
+                    className="text-[#E5CC9D]"
+                  />
+
+                  <motion.span
+                    animate={{ opacity: [0.3, 1, 0.3] }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                    }}
+                    className="
+                      absolute -right-2 top-3
+                      text-[#E5CC9D]
+                    "
+                  >
+                    ✦
+                  </motion.span>
                 </motion.div>
 
                 {/* ETIQUETA */}
-
                 <p
                   className="
-                    mb-4
-                    text-[10px]
-                    font-semibold
-                    uppercase
-                    tracking-[0.3em]
-                    text-[#B89B5E]
+                    mb-4 text-[10px]
+                    uppercase tracking-[0.36em]
+                    text-[#C6AA79]
                     sm:text-xs
                   "
                 >
-                  Nuestra Boda
+                  Una historia escrita en las estrellas
                 </p>
 
                 {/* TÍTULO */}
-
                 <h2
                   id="titulo-musica"
                   className="
+                    mx-auto max-w-[340px]
                     font-playfair
-                    text-3xl
-                    font-normal
-                    leading-tight
-                    text-[#29241E]
-                    sm:text-4xl
+                    text-[29px] font-normal
+                    leading-[1.3]
+                    text-[#F4F0E7]
+                    sm:text-[37px]
                   "
                 >
                   {CONFIG.titulo}
                 </h2>
 
                 {/* DIVISOR */}
-
-                <div
-                  className="
-                    mx-auto
-                    my-7
-                    h-px
-                    w-20
-                    bg-[#B89B5E]
-                  "
-                />
+                <div className="my-6 flex items-center justify-center gap-3">
+                  <span className="h-px w-12 bg-[#C6AA79]/50" />
+                  <Sparkles
+                    size={14}
+                    strokeWidth={1.1}
+                    className="text-[#C6AA79]"
+                  />
+                  <span className="h-px w-12 bg-[#C6AA79]/50" />
+                </div>
 
                 {/* DESCRIPCIÓN */}
-
                 <p
                   className="
-                    mx-auto
-                    max-w-xs
+                    mx-auto max-w-[310px]
                     font-playfair
-                    text-sm
+                    text-[13px]
                     leading-[1.9]
-                    text-[#5B544A]
-                    sm:text-base
+                    text-[#D5D9E0]
+                    sm:text-[15px]
                   "
                 >
                   {CONFIG.descripcion}
                 </p>
 
+                {/* PREGUNTA */}
                 <p
                   className="
-                    mt-5
-                    text-sm
-                    italic
-                    text-[#8A754C]
+                    mt-6 font-playfair
+                    text-sm italic
+                    text-[#E0C89A]
                   "
                 >
-                  ¿Deseas escucharla?
+                  {CONFIG.pregunta}
                 </p>
 
                 {/* BOTONES */}
-
-                <div
-                  className="
-                    mt-9
-                    flex
-                    flex-col
-                    gap-3
-                  "
-                >
-                  {/* SÍ, ESCUCHAR */}
+                <div className="mt-8 flex flex-col gap-3">
 
                   <motion.button
                     type="button"
                     onClick={iniciarMusica}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
+                    whileHover={{ scale: 1.025 }}
+                    whileTap={{ scale: 0.975 }}
                     className="
-                      flex
-                      w-full
-                      items-center
-                      justify-center
-                      gap-3
+                      flex w-full
+                      items-center justify-center gap-3
                       rounded-full
-                      bg-[#B89B5E]
-                      px-6
-                      py-4
-                      text-sm
-                      font-medium
+                      bg-[#C6AA79]
+                      px-5 py-[15px]
+                      text-[13px] font-medium
                       tracking-wide
-                      text-white
+                      text-[#0B1425]
                       transition-colors
-                      hover:bg-[#A58A50]
+                      hover:bg-[#E1C79A]
                     "
                   >
-                    <Volume2 size={19} />
-                    Sí, escuchar música
+                    <Volume2 size={18} strokeWidth={1.6} />
+                    Sí, comenzar con música
                   </motion.button>
-
-                  {/* NO, CONTINUAR */}
 
                   <motion.button
                     type="button"
@@ -363,48 +421,31 @@ const Musica = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="
-                      flex
-                      w-full
-                      items-center
-                      justify-center
-                      gap-3
+                      flex w-full
+                      items-center justify-center gap-3
                       rounded-full
-                      border
-                      border-[#B89B5E]/60
-                      bg-white
-                      px-6
-                      py-4
-                      text-sm
-                      font-medium
+                      border border-[#C6AA79]/50
+                      bg-[#111E31]
+                      px-5 py-[15px]
+                      text-[13px]
                       tracking-wide
-                      text-[#7B6744]
+                      text-[#F4F0E7]
                       transition-colors
-                      hover:bg-[#F0E8D9]
+                      hover:bg-[#1B2C43]
                     "
                   >
-                    <VolumeX size={19} />
+                    <VolumeX size={18} strokeWidth={1.6} />
                     Continuar sin música
                   </motion.button>
                 </div>
 
                 {/* ORNAMENTO FINAL */}
-
-                <div
-                  className="
-                    mt-9
-                    flex
-                    items-center
-                    justify-center
-                    gap-4
-                  "
-                >
-                  <span className="h-px w-10 bg-[#B89B5E]/60" />
-
-                  <span className="text-[#B89B5E]">
+                <div className="mt-8 flex items-center justify-center gap-4">
+                  <span className="h-px w-10 bg-[#C6AA79]/40" />
+                  <span className="text-xs text-[#C6AA79]">
                     ✦
                   </span>
-
-                  <span className="h-px w-10 bg-[#B89B5E]/60" />
+                  <span className="h-px w-10 bg-[#C6AA79]/40" />
                 </div>
               </div>
             </motion.div>
@@ -413,14 +454,14 @@ const Musica = () => {
       </AnimatePresence>
 
       {/* ======================================
-          BOTÓN FLOTANTE DE MÚSICA
+          CONTROL FLOTANTE
       ====================================== */}
 
       {!mostrarVentana && (
         <motion.button
           type="button"
           onClick={alternarMusica}
-          initial={{ opacity: 0, scale: 0.7 }}
+          initial={{ opacity: 0, scale: 0.75 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
           aria-label={
@@ -434,36 +475,27 @@ const Musica = () => {
               : "Reproducir música"
           }
           className="
-            fixed
-            bottom-6
-            right-5
+            fixed bottom-6 right-5
             z-[9998]
-            flex
-            h-14
-            w-14
-            items-center
-            justify-center
+            flex h-14 w-14
+            items-center justify-center
             rounded-full
-            border-2
-            border-[#E7D7B1]
-            bg-[#B89B5E]
-            text-white
-            shadow-[0_8px_25px_rgba(0,0,0,0.18)]
+            border border-[#C6AA79]
+            bg-[#101C2E]
+            text-[#E5CC9D]
+            shadow-[0_8px_28px_rgba(0,0,0,0.3)]
             transition-colors
-            hover:bg-[#A58A50]
-            sm:bottom-8
-            sm:right-8
+            hover:bg-[#1B2C43]
+            sm:bottom-8 sm:right-8
           "
         >
           {reproduciendo ? (
-            <Volume2 size={24} strokeWidth={1.7} />
+            <Volume2 size={23} strokeWidth={1.5} />
           ) : (
-            <VolumeX size={24} strokeWidth={1.7} />
+            <VolumeX size={23} strokeWidth={1.5} />
           )}
         </motion.button>
       )}
     </>
   );
-};
-
-export default Musica;
+}
