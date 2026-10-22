@@ -13,29 +13,30 @@ import {
 
 const CONFIG = {
   titulo: "Código de vestimenta",
+
   vestimenta: "Casual elegante",
+
   colores: "Colores oscuros",
 
-  frase:
-    "Una noche especial, bajo un cielo lleno de estrellas.",
+  mensajeAdultos:
+    "Queremos que disfrutes de esta noche mágica al máximo, que bailes, celebres y vivas cada momento sin preocupaciones. Por ello, hemos preparado una celebración exclusiva para adultos. Agradecemos de corazón tu comprensión y esperamos compartir contigo una noche inolvidable.",
+
+
 };
 
 // ==========================================
 // CONFIGURACIÓN DE ESTRELLAS
 // ==========================================
 
-// Modifica este número para cambiar
-// la cantidad de estrellas del fondo.
-//
 // 180 = Bastantes estrellas
 // 350 = Cielo muy tupido
 // 500 = Cielo extremadamente estrellado
 
 const CANTIDAD_ESTRELLAS = 350;
 
-// Generador de posiciones estables.
-// Evita que las estrellas cambien de lugar
-// cada vez que React actualiza el componente.
+// ==========================================
+// GENERADOR DE POSICIONES ESTABLES
+// ==========================================
 
 function numeroPseudoaleatorio(semilla) {
   const valor =
@@ -124,6 +125,7 @@ const fadeUp = {
   visible: {
     opacity: 1,
     y: 0,
+
     transition: {
       duration: 0.9,
       ease: [0.22, 1, 0.36, 1],
@@ -434,7 +436,10 @@ export default function Vestimenta() {
           variants={fadeUp}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{
+            once: true,
+            amount: 0.2,
+          }}
           className="
             relative
             w-full
@@ -594,6 +599,77 @@ export default function Vestimenta() {
         </motion.div>
 
         {/* ======================================
+            CELEBRACIÓN EXCLUSIVA PARA ADULTOS
+        ====================================== */}
+
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="
+            mx-auto
+            mt-14
+            w-full
+            max-w-[570px]
+            text-center
+          "
+        >
+          {/* ORNAMENTO */}
+
+          <div
+            className="
+              mb-6
+              flex
+              items-center
+              justify-center
+              gap-4
+            "
+          >
+            <span className="h-px w-10 bg-[#C6AA79]/50" />
+
+            <MoonStar
+              size={21}
+              strokeWidth={1}
+              className="text-[#C6AA79]"
+            />
+
+            <span className="h-px w-10 bg-[#C6AA79]/50" />
+          </div>
+
+          {/* TÍTULO DEL AVISO */}
+
+          <h3
+            className="
+              mb-6
+              font-playfair
+              text-[23px]
+              font-normal
+              text-[#E5CC9D]
+              sm:text-[28px]
+            "
+          >
+            Una noche para disfrutar
+          </h3>
+
+          {/* MENSAJE */}
+
+          <p
+            className="
+              mx-auto
+              max-w-[520px]
+              font-playfair
+              text-[15px]
+              leading-[1.95]
+              text-[#F4F0E7]
+              sm:text-[18px]
+            "
+          >
+            {CONFIG.mensajeAdultos}
+          </p>
+        </motion.div>
+
+        {/* ======================================
             FRASE FINAL
         ====================================== */}
 
@@ -610,7 +686,7 @@ export default function Vestimenta() {
             text-[17px]
             italic
             leading-relaxed
-            text-[#F4F0E7]
+            text-[#E5CC9D]
             sm:text-[20px]
           "
         >

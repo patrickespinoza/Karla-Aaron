@@ -24,7 +24,7 @@ const CONFIG = {
   },
 
   evento: {
-    titulo: "Tornaboda",
+    titulo: "Celebremos Juntos",
     hora: "4:00 PM",
     lugar: "La Cabaña De Marcos",
     direccion: 
@@ -275,18 +275,6 @@ function TarjetaEvento() {
 
         {/* TÍTULO */}
 
-        <p
-          className="
-            mb-3
-            text-[10px]
-            uppercase
-            tracking-[0.35em]
-            text-[#A88A57]
-            sm:text-xs
-          "
-        >
-          Celebremos juntos
-        </p>
 
         <h3
           className="
@@ -295,10 +283,22 @@ function TarjetaEvento() {
             font-normal
             text-[#172840]
             sm:text-[44px]
-          "
+            "
         >
           {evento.titulo}
         </h3>
+            <p
+              className="
+                mb-3
+                text-[10px]
+                uppercase
+                tracking-[0.35em]
+                text-[#A88A57]
+                sm:text-xs
+              "
+            >
+              Queremos que nos acompañes a conmemorar este historia de amor y festejar en esta noche especial.
+            </p>
 
         {/* ORNAMENTO */}
 
