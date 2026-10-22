@@ -297,7 +297,7 @@ function TarjetaEvento() {
                 sm:text-xs
               "
             >
-              Queremos que nos acompañes a conmemorar este historia de amor y festejar en esta noche especial.
+              Queremos que nos acompañes a conmemorar esta historia de amor y festejar en esta noche especial.
             </p>
 
         {/* ORNAMENTO */}
